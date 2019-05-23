@@ -3,3 +3,4 @@ LKVOLearner/
 GeoNet_pytorch/
 .vscode/
 src/__pycache__/
+src/test.py
