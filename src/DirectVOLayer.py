@@ -121,6 +121,25 @@ class Twist2Mat(nn.Module):
         return Variable(self.E).view(1, 3, 3).expand(batch_size, 3, 3)\
             + A*rot_angle.sin().view(batch_size, 1, 1).expand(batch_size, 3, 3)\
             + A.bmm(A)*((1-rot_angle.cos()).view(batch_size, 1, 1).expand(batch_size, 3, 3))
+            
+class Mat2Twist(nn.Module):
+    def __init__(self):
+        super(Mat2Twist, self).__init__()
+
+    def mattoaxis(self, mat_batch, rot_batch):
+        batch_size, _  = a_batch.size()
+        s_theta = (rot_batch.sin() * 2).view(batch_size, 1)
+        w1 = (mat_batch[:, 2, 1] - mat_batch[:, 1, 2]).view(batch_size, 1)
+        w2 = (mat_batch[:, 0, 2] - mat_batch[:, 2, 0]).view(batch_size, 1)
+        w3 = (mat_batch[:, 1, 0] - mat_batch[:, 0, 1]).view(batch_size, 1)
+        return torch.cat((w1, w2, w3), 1)/s_theta
+
+    def forward(self, mat_batch):
+        batch_size, _ = mat_batch.size()
+        rot_angle = torch.cat(tuple([((mat_batch[_].trace()-1)/2).acos().view(1,1,1) for _ in range(batch_size)])).view(batch_size, 1)
+        rot_axis = self.mattoaxis(mat_batch, rot_angle)
+        return (rot_angle*rot_axis).view(batch_size, 3)
+
 
 def compute_img_stats(img):
     # img_pad = torch.nn.ReplicationPad2d(1)(img)
