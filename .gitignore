@@ -1,3 +1,5 @@
 GeoNet/
 LKVOLearner/
 GeoNet_pytorch/
+.vscode/
+src/__pycache__/
